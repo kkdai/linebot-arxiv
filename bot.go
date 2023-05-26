@@ -64,15 +64,14 @@ func parseIntent(msg string) *Intent {
 		log.Println("Error:", err)
 		return nil
 	}
+	log.Println(" Intent:=", intent)
 	return &intent
 }
 
 // handleArxivSearch:
 func handleArxivSearch(event *linebot.Event, msg string) {
-
-	// result := getArxivArticle(msg)
-	reply := gptCompleteContext(msg)
-	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply)).Do(); err != nil {
+	result := getArxivArticle(msg)
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(result)).Do(); err != nil {
 		log.Print(err)
 	}
 
