@@ -136,7 +136,7 @@ func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot
 		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
-			result.Title,
+			truncateString(result.Title, 35)+"..",
 			result.Summary,
 			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("翻譯摘要", transData, "", "", "", ""),
@@ -175,4 +175,11 @@ func actionNewest(event *linebot.Event, values url.Values) {
 }
 
 func actionGPTTranslate(event *linebot.Event, values url.Values) {
+}
+
+func truncateString(s string, maxLength int) string {
+	if len(s) <= maxLength {
+		return s
+	}
+	return s[:maxLength]
 }
