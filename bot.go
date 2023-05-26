@@ -137,7 +137,7 @@ func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
-			result.Summary,
+			truncateString(result.Summary, 55)+"..",
 			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("翻譯摘要", transData, "", "", "", ""),
 		)
