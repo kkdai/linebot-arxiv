@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
+	"github.com/jtracks/go-arciv/arciv"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
+)
+
+// Postback Actions
+const (
+	ActionOpenArticle  string = "OpenArticle"
+	ActionTransArticle string = "TransArticle"
 )
 
 type Intent struct {
@@ -14,6 +22,7 @@ type Intent struct {
 	NumberOfArticle int    `json:"numberOfArticle"`
 }
 
+const Image_URL = "https://github.com/kkdai/linebot-arxiv/blob/f9ca955ff9392f5af4d27e617e5f71fc97c8f60e/img/paper.png?raw=true"
 const PROMPT_GetIntent = `幫我把以下文字，拆成 JSON 回覆。 
 "%s"
 ---
@@ -46,6 +55,11 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				handleArxivSearch(event, message.Text)
 			}
+		} else if event.Type == linebot.EventTypePostback {
+			log.Println("got a postback event")
+			log.Println(event.Postback.Data)
+			postbackHandler(event)
+
 		}
 	}
 }
@@ -68,12 +82,12 @@ func parseIntent(msg string) *Intent {
 
 // handleArxivSearch:
 func handleArxivSearch(event *linebot.Event, msg string) {
-	result := getArxivArticle(msg)
-	log.Println("Ret: size=", len(result), ":", result)
-	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(result)).Do(); err != nil {
-		log.Print(err)
-	}
+	results := getArxivArticle(msg)
 
+	template := getCarouseTemplate(event.Source.UserID, results)
+	if template != nil {
+		sendCarouselMessage(event, template, "Paper Result")
+	}
 }
 
 // handleGPT:
@@ -109,4 +123,56 @@ func getGroupID(event *linebot.Event) string {
 	}
 
 	return ""
+}
+
+func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot.CarouselTemplate) {
+	if len(records) == 0 {
+		log.Println("err1")
+		return nil
+	}
+
+	columnList := []*linebot.CarouselColumn{}
+	for _, result := range records {
+		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
+		tmpColumn := linebot.NewCarouselColumn(
+			Image_URL,
+			result.Title,
+			result.Summary,
+			linebot.NewURIAction("打開網址", result.ID),
+			linebot.NewPostbackAction("翻譯摘要", transData, "", "", "", ""),
+		)
+		columnList = append(columnList, tmpColumn)
+	}
+	template = linebot.NewCarouselTemplate(columnList...)
+	return template
+}
+
+func sendCarouselMessage(event *linebot.Event, template *linebot.CarouselTemplate, altText string) {
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTemplateMessage(altText, template)).Do(); err != nil {
+		log.Println(err)
+	}
+}
+
+func postbackHandler(event *linebot.Event) {
+	m, _ := url.ParseQuery(event.Postback.Data)
+	action := m.Get("action")
+	log.Println("Action = ", action)
+	actionHandler(event, action, m)
+}
+
+func actionHandler(event *linebot.Event, action string, values url.Values) {
+	switch action {
+	case ActionOpenArticle:
+		actionNewest(event, values)
+	case ActionTransArticle:
+		actionGPTTranslate(event, values)
+	default:
+		log.Println("Unimplement action handler", action)
+	}
+}
+
+func actionNewest(event *linebot.Event, values url.Values) {
+}
+
+func actionGPTTranslate(event *linebot.Event, values url.Values) {
 }
