@@ -1,28 +1,27 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-const PROMPT_AskLocation = `請問以下的文字包含某個地點嗎？ 如果不是的話，請簡單的回覆我 "NO" 即可。 ---- %s ----`
-const PROMPT_AskDate = `請問以下的文字包含某段時間嗎？ 如果不是的話，請簡單的回覆我 "NO" 即可。 ---- %s ----`
-const PROMPT_AskPeriod = `請問以下的文字包含某段時間嗎？ 如果不是的話，請簡單的回覆我 "NO" 即可。 ---- %s ----`
-const PROMPT_AskPlanning = `你是一個旅行社的員工，協助評估顧客的旅遊景點規劃 。現在我即將去: 
-地點： 
-%s 
+type Intent struct {
+	Keywords        string `json:"keywords"`
+	NumberOfArticle int    `json:"numberOfArticle"`
+}
 
-期間在: 
-%s
-
-總共天數是:
-%s
-
-%s 又有什麼特殊的節日？
-根據這些節日，有沒有必去的景點規劃? 幫我每一天分開列出。`
+const PROMPT_GetIntent = `幫我把以下文字，拆成 JSON 回覆。 
+"%s"
+---
+{   
+keywords: ""
+numberOfArticle: 0
+}
+---`
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := bot.ParseRequest(r)
@@ -46,13 +45,37 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				// Directly to ChatGPT
-				if strings.Contains(message.Text, ":gpt") {
-					handleGPT(GPT_Complete, event, message.Text)
-				}
+				handleArxivSearch(event, message.Text)
+
 			}
 		}
 	}
+}
+
+// parseIntent:
+func parseIntent(msg string) *Intent {
+	gpt1 := fmt.Sprintf(PROMPT_GetIntent, msg)
+	reply := gptCompleteContext(gpt1)
+
+	var intent Intent
+	// Unmarshal the JSON data into the struct
+	err := json.Unmarshal([]byte(reply), &intent)
+	if err != nil {
+		log.Println("Error:", err)
+		return nil
+	}
+	return &intent
+}
+
+// handleArxivSearch:
+func handleArxivSearch(event *linebot.Event, msg string) {
+
+	// result := getArxivArticle(msg)
+	reply := gptCompleteContext(msg)
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply)).Do(); err != nil {
+		log.Print(err)
+	}
+
 }
 
 func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {

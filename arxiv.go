@@ -1,21 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/jtracks/go-arciv/arciv"
 )
 
-// goArxivArticle:
-func goArxivArticle(keywords string) error {
+// getArxivArticle:
+func getArxivArticle(keyword string) []arciv.Entry {
 	result, _ := arciv.Search(
 		arciv.SimpleQuery{
-			Search:     "electron",
+			Search:     keyword,
 			MaxResults: 5,
 		})
 
 	for i, e := range result.Entries {
-		fmt.Printf("Result %v: %v\n %v", i+1, e.Title, e.Summary)
+		log.Printf("Result %v: %v\n %v", i+1, e.Title, e.Summary)
 	}
-	return nil
+	return result.Entries
 }
