@@ -1,0 +1,32 @@
+{
+  "name": "LINE Bot with arXiv",
+  "description": "Using ChatGPT API to build LINE Bot.",
+  "repository": "https://github.com/kkdai/linebot-arxiv",
+  "keywords": [
+    "Line",
+    "go",
+    "static"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/kr/heroku-buildpack-go.git"
+    },
+    {
+      "url": "heroku/go"
+    }
+  ],
+  "env": {
+    "ChatGptToken": {
+      "description": "ChatGPT Access Token",
+      "required": true
+    },
+    "ChannelAccessToken": {
+      "description": "Channel Access Token",
+      "required": true
+    },
+    "ChannelSecret": {
+      "description": "Channel Secret",
+      "required": true
+    }
+  }
+}
