@@ -44,9 +44,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					// 如果聊天機器人在群組中，不回覆訊息。
 					return
 				}
-
 				handleArxivSearch(event, message.Text)
-
 			}
 		}
 	}
@@ -71,12 +69,14 @@ func parseIntent(msg string) *Intent {
 // handleArxivSearch:
 func handleArxivSearch(event *linebot.Event, msg string) {
 	result := getArxivArticle(msg)
+	log.Println("Ret: size=", len(result), ":", result)
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(result)).Do(); err != nil {
 		log.Print(err)
 	}
 
 }
 
+// handleGPT:
 func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 	switch action {
 	case GPT_Complete:
@@ -95,7 +95,6 @@ func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 			}
 		}
 	}
-
 }
 
 func isGroupEvent(event *linebot.Event) bool {
