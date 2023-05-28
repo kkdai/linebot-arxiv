@@ -7,14 +7,16 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/kkdai/linebot-arxiv/models"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/marvin-hansen/arxiv/v1"
 )
 
 // Postback Actions
 const (
-	ActionOpenDetail   string = "DetailArticle"
-	ActionTransArticle string = "TransArticle"
+	ActionOpenDetail      string = "DetailArticle"
+	ActionTransArticle    string = "TransArticle"
+	ActionBookmarkArticle string = "BookmarkArticle"
 )
 
 type Intent struct {
@@ -135,6 +137,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 	for _, result := range records {
 		detailData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionOpenDetail, result.ID, userId)
 		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
+		SaveData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionBookmarkArticle, result.ID, userId)
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
@@ -142,6 +145,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("知道更多", detailData, "", "", "", ""),
 			linebot.NewPostbackAction("翻譯摘要(比較久)", transData, "", "", "", ""),
+			linebot.NewPostbackAction("儲存文章", SaveData, "", "", "", ""),
 		)
 		columnList = append(columnList, tmpColumn)
 	}
@@ -165,10 +169,16 @@ func postbackHandler(event *linebot.Event) {
 func actionHandler(event *linebot.Event, action string, values url.Values) {
 	switch action {
 	case ActionOpenDetail:
+		log.Println("ActionOpenDetail:", values)
 		actionGetDetail(event, values)
 	case ActionTransArticle:
 		log.Println("ActionTransArticle:", values)
 		actionGPTTranslate(event, values)
+	case ActionBookmarkArticle:
+		log.Println("ActionBookmarkArticle:", values)
+		actionBookmarkArticle(event, values)
+		log.Println("Show all article:....")
+		DB.ShowAll()
 	default:
 		log.Println("Unimplement action handler", action)
 	}
@@ -196,6 +206,16 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(gptRet)).Do(); err != nil {
 		log.Println(err)
 	}
+}
+
+func actionBookmarkArticle(event *linebot.Event, values url.Values) {
+	articleID := values.Get("url")
+	uid := values.Get("user_id")
+	newUser := models.UserFavorite{
+		UserId:    uid,
+		Favorites: []string{articleID},
+	}
+	DB.Add(newUser)
 }
 
 func truncateString(s string, maxLength int) string {
