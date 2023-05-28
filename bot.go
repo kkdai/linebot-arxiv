@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/kkdai/linebot-arxiv/models"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -133,8 +134,21 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 		return nil
 	}
 
+	var checkList []string
+	if record, err := DB.Get(userId); err != nil {
+		checkList = record.Favorites
+	}
+
+	log.Println("all items:", checkList)
+
 	columnList := []*linebot.CarouselColumn{}
 	for _, result := range records {
+		var saveTogle string
+		if exist, _ := InArray(result.ID, checkList); exist {
+			saveTogle = "儲存文章"
+		} else {
+			saveTogle = "移除儲存"
+		}
 		detailData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionOpenDetail, result.ID, userId)
 		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
 		SaveData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionBookmarkArticle, result.ID, userId)
@@ -145,7 +159,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 			//			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("知道更多", detailData, "", "", "", ""),
 			linebot.NewPostbackAction("翻譯摘要(比較久)", transData, "", "", "", ""),
-			linebot.NewPostbackAction("儲存文章", SaveData, "", "", "", ""),
+			linebot.NewPostbackAction(saveTogle, SaveData, "", "", "", ""),
 		)
 		columnList = append(columnList, tmpColumn)
 	}
@@ -209,14 +223,34 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 }
 
 func actionBookmarkArticle(event *linebot.Event, values url.Values) {
-	articleID := values.Get("url")
+	newFavoriteArticle := values.Get("url")
 	uid := values.Get("user_id")
+	var toggleMessage string
 	newUser := models.UserFavorite{
 		UserId:    uid,
-		Favorites: []string{articleID},
+		Favorites: []string{newFavoriteArticle},
 	}
-	DB.Add(newUser)
-	ret := fmt.Sprintf("文章: \n%s \n已經存起來", articleID)
+	if record, err := DB.Get(uid); err != nil {
+		log.Println("User data is not created, create a new one")
+		DB.Add(newUser)
+	} else {
+		log.Println("Record found, update it", record)
+		oldRecords := record.Favorites
+
+		if exist, idx := InArray(newFavoriteArticle, oldRecords); exist == true {
+			log.Println(newFavoriteArticle, "已存在，移除")
+			oldRecords = RemoveStringItem(oldRecords, idx)
+			toggleMessage = "已從最愛中移除"
+		} else {
+			log.Println(newFavoriteArticle, "新增最愛")
+			oldRecords = append(oldRecords, newFavoriteArticle)
+			toggleMessage = "已新增至最愛"
+		}
+		record.Favorites = oldRecords
+		DB.Update(record)
+	}
+
+	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
 		log.Println(err)
 	}
@@ -228,4 +262,29 @@ func truncateString(s string, maxLength int) string {
 		return s
 	}
 	return s[:maxLength]
+}
+
+// InArray: Check if string item is in array
+func InArray(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+	return
+}
+
+// RemoveStringItem: Remove string item from slice
+func RemoveStringItem(slice []string, s int) []string {
+	return append(slice[:s], slice[s+1:]...)
 }
