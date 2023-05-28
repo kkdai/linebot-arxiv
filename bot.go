@@ -139,7 +139,7 @@ func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot
 			truncateString(result.Title, 35)+"..",
 			truncateString(result.Summary, 55)+"..",
 			linebot.NewURIAction("打開網址", result.ID),
-			linebot.NewPostbackAction("翻譯摘要", transData, "", "", "", ""),
+			linebot.NewPostbackAction("知道更多", transData, "", "", "", ""),
 		)
 		columnList = append(columnList, tmpColumn)
 	}
