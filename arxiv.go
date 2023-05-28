@@ -54,6 +54,7 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 		return nil
 	}
 
+	log.Println("Going to:", "https://export.arxiv.org/api/query?id_list="+idStr)
 	resp, err := http.Get("https://export.arxiv.org/api/query?id_list=" + idStr)
 	if err != nil {
 		log.Println("Error:", err)
@@ -62,15 +63,16 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 	defer resp.Body.Close()
 
 	data, _ := ioutil.ReadAll(resp.Body)
+	log.Println("data=:", data)
 
-	var entry []*arxiv.Entry
+	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
 
-	log.Println("Title:", entry[0].Title)
-	log.Println("Summary:", entry[0].Summary)
+	log.Println("Title:", entry.Entry[0].Title)
+	log.Println("Summary:", entry.Entry[0].Summary)
 	log.Println("Authors:")
-	for _, author := range entry[0].Author {
+	for _, author := range entry.Entry[0].Author {
 		log.Println(" -", author.Name)
 	}
-	return entry
+	return entry.Entry
 }
