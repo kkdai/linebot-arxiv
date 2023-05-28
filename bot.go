@@ -142,7 +142,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
 			truncateString(result.Summary.Body, 55)+"..",
-			linebot.NewURIAction("打開網址", result.ID),
+			//			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("知道更多", detailData, "", "", "", ""),
 			linebot.NewPostbackAction("翻譯摘要(比較久)", transData, "", "", "", ""),
 			linebot.NewPostbackAction("儲存文章", SaveData, "", "", "", ""),
@@ -192,7 +192,7 @@ func actionGetDetail(event *linebot.Event, values url.Values) {
 	for _, a := range result[0].Author {
 		authors = fmt.Sprintf("%s\n%s", authors, a.Name)
 	}
-	content := fmt.Sprintf("論文： %s \n作者: \n %s \n摘要: \n %s \n論文網址: \n %s", result[0].Title, authors, result[0].Summary.Body, result[0].Link[1].Href)
+	content := fmt.Sprintf("論文： %s \n作者: \n %s \n摘要: \n %s \n論文網址: \n%s", result[0].Title, authors, result[0].Summary.Body, result[0].Link[1].Href)
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content)).Do(); err != nil {
 		log.Println(err)
 	}
