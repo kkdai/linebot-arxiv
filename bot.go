@@ -180,15 +180,10 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	log.Println("actionGPTTranslate: url=", url)
 	result := getArticleByURL(url)
 	content := fmt.Sprintf("論文： %s \n, 摘要: \n %s \n", result[0].Title, result[0].Summary.Body)
-	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content), linebot.NewTextMessage("中文內容稍後...")).Do(); err != nil {
+	gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, content))
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content), linebot.NewTextMessage(gptRet)).Do(); err != nil {
 		log.Println(err)
 	}
-	go func(content string, token string) {
-		gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, content))
-		if _, err := bot.ReplyMessage(token, linebot.NewTextMessage(gptRet)).Do(); err != nil {
-			log.Println(err)
-		}
-	}(content, event.ReplyToken)
 }
 
 func truncateString(s string, maxLength int) string {
