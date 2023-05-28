@@ -135,7 +135,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 	}
 
 	var checkList []string
-	if record, err := DB.Get(userId); err != nil {
+	if record, err := DB.Get(userId); err == nil {
 		checkList = record.Favorites
 	}
 
