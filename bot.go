@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/jtracks/go-arciv/arciv"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"golang.org/x/tools/blog/atom"
 )
 
 // Postback Actions
@@ -125,7 +125,7 @@ func getGroupID(event *linebot.Event) string {
 	return ""
 }
 
-func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot.CarouselTemplate) {
+func getCarouseTemplate(userId string, records []*atom.Entry) (template *linebot.CarouselTemplate) {
 	if len(records) == 0 {
 		log.Println("err1")
 		return nil
@@ -137,7 +137,7 @@ func getCarouseTemplate(userId string, records []arciv.Entry) (template *linebot
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
-			truncateString(result.Summary, 55)+"..",
+			truncateString(result.Summary.Body, 55)+"..",
 			linebot.NewURIAction("打開網址", result.ID),
 			linebot.NewPostbackAction("知道更多", transData, "", "", "", ""),
 		)
