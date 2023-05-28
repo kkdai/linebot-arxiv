@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -43,4 +46,31 @@ func getIDfromURL(urlStr string) string {
 
 	// Remove the leading slash and "abs/" from the path
 	return strings.TrimPrefix(u.Path, "/abs/")
+}
+
+func getArticleByURL(urlStr string) []*arxiv.Entry {
+	idStr := getIDfromURL(urlStr)
+	if idStr == "" {
+		return nil
+	}
+
+	resp, err := http.Get("https://export.arxiv.org/api/query?id_list=" + idStr)
+	if err != nil {
+		log.Println("Error:", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	data, _ := ioutil.ReadAll(resp.Body)
+
+	var entry []*arxiv.Entry
+	xml.Unmarshal(data, &entry)
+
+	log.Println("Title:", entry[0].Title)
+	log.Println("Summary:", entry[0].Summary)
+	log.Println("Authors:")
+	for _, author := range entry[0].Author {
+		log.Println(" -", author.Name)
+	}
+	return entry
 }

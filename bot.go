@@ -165,6 +165,7 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 	case ActionOpenArticle:
 		actionNewest(event, values)
 	case ActionTransArticle:
+		log.Println("ActionTransArticle:", values)
 		actionGPTTranslate(event, values)
 	default:
 		log.Println("Unimplement action handler", action)
@@ -175,6 +176,13 @@ func actionNewest(event *linebot.Event, values url.Values) {
 }
 
 func actionGPTTranslate(event *linebot.Event, values url.Values) {
+	url := values.Get("url")
+	log.Println("actionGPTTranslate: url=", url)
+	result := getArticleByURL(url)
+	content := fmt.Sprintf("論文：%s \n, 摘要: %s \n", result[0].Title, result[0].Summary)
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content)).Do(); err != nil {
+		log.Println(err)
+	}
 }
 
 func truncateString(s string, maxLength int) string {
