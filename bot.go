@@ -144,7 +144,7 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 	columnList := []*linebot.CarouselColumn{}
 	for _, result := range records {
 		var saveTogle string
-		if exist, _ := InArray(result.ID, checkList); exist {
+		if exist, _ := InArray(result.ID, checkList); !exist {
 			saveTogle = "儲存文章"
 		} else {
 			saveTogle = "移除儲存"
