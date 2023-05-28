@@ -216,6 +216,11 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 		Favorites: []string{articleID},
 	}
 	DB.Add(newUser)
+	ret := fmt.Sprintf("文章: \n%s \n已經存起來", articleID)
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
+		log.Println(err)
+	}
+
 }
 
 func truncateString(s string, maxLength int) string {
