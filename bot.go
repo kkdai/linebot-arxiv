@@ -13,7 +13,7 @@ import (
 
 // Postback Actions
 const (
-	ActionOpenArticle  string = "OpenArticle"
+	ActionOpenDetail   string = "DetailArticle"
 	ActionTransArticle string = "TransArticle"
 )
 
@@ -133,13 +133,15 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 
 	columnList := []*linebot.CarouselColumn{}
 	for _, result := range records {
+		detailData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionOpenDetail, result.ID, userId)
 		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
 			truncateString(result.Summary.Body, 55)+"..",
 			linebot.NewURIAction("打開網址", result.ID),
-			linebot.NewPostbackAction("知道更多", transData, "", "", "", ""),
+			linebot.NewPostbackAction("知道更多", detailData, "", "", "", ""),
+			linebot.NewPostbackAction("翻譯摘要(比較久)", transData, "", "", "", ""),
 		)
 		columnList = append(columnList, tmpColumn)
 	}
@@ -162,8 +164,8 @@ func postbackHandler(event *linebot.Event) {
 
 func actionHandler(event *linebot.Event, action string, values url.Values) {
 	switch action {
-	case ActionOpenArticle:
-		actionNewest(event, values)
+	case ActionOpenDetail:
+		actionGetDetail(event, values)
 	case ActionTransArticle:
 		log.Println("ActionTransArticle:", values)
 		actionGPTTranslate(event, values)
@@ -172,16 +174,26 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 	}
 }
 
-func actionNewest(event *linebot.Event, values url.Values) {
+func actionGetDetail(event *linebot.Event, values url.Values) {
+	url := values.Get("url")
+	log.Println("actionGPTTranslate: url=", url)
+	result := getArticleByURL(url)
+	authors := ""
+	for _, a := range result[0].Author {
+		authors = fmt.Sprintf("%s\n%s", authors, a.Name)
+	}
+	content := fmt.Sprintf("論文： %s \n, 作者: \n %s \n 摘要: \n %s \n 論文網址：\n %s", result[0].Title, authors, result[0].Summary.Body, result[0].Link[1].Href)
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content)).Do(); err != nil {
+		log.Println(err)
+	}
 }
 
 func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	url := values.Get("url")
 	log.Println("actionGPTTranslate: url=", url)
 	result := getArticleByURL(url)
-	content := fmt.Sprintf("論文： %s \n, 摘要: \n %s \n", result[0].Title, result[0].Summary.Body)
-	gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, content))
-	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content), linebot.NewTextMessage(gptRet)).Do(); err != nil {
+	gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(gptRet)).Do(); err != nil {
 		log.Println(err)
 	}
 }
