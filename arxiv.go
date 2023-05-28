@@ -7,12 +7,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/orijtech/arxiv/v1"
-	"golang.org/x/tools/blog/atom"
+	"github.com/marvin-hansen/arxiv/v1"
 )
 
 // getArxivArticle:
-func getArxivArticle(keyword string) []*atom.Entry {
+func getArxivArticle(keyword string) []*arxiv.Entry {
 	resChan, _, err := arxiv.Search(context.Background(), &arxiv.Query{
 		Terms:         keyword,
 		MaxPageNumber: 10,

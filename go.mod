@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/marvin-hansen/arxiv v0.1.2 // indirect
 	github.com/orijtech/otils v0.0.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
 )

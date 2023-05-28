@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"golang.org/x/tools/blog/atom"
+	"github.com/marvin-hansen/arxiv/v1"
 )
 
 // Postback Actions
@@ -125,7 +125,7 @@ func getGroupID(event *linebot.Event) string {
 	return ""
 }
 
-func getCarouseTemplate(userId string, records []*atom.Entry) (template *linebot.CarouselTemplate) {
+func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebot.CarouselTemplate) {
 	if len(records) == 0 {
 		log.Println("err1")
 		return nil

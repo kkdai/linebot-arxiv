@@ -32,6 +32,8 @@ github.com/google/go-cmp v0.5.3/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/line/line-bot-sdk-go/v7 v7.19.0 h1:WEbuBBSq65RMMqTn3vIl+Eb4wv2CjhZz7kiw8XTk2Wg=
 github.com/line/line-bot-sdk-go/v7 v7.19.0/go.mod h1:idpoxOZgtSd8JyhctMMpwg5LNgRAIL/QIxa5S0DXcMg=
+github.com/marvin-hansen/arxiv v0.1.2 h1:iszWHAPIYl/WaOi2AvZqZLSIuFhNadzWgstiTEWKxM8=
+github.com/marvin-hansen/arxiv v0.1.2/go.mod h1:dHhy/j0mLoQDYjfJnZnurdctp8cbDN+ZoAhlf9XsZMs=
 github.com/orijtech/arxiv v0.0.0-20180404200544-d693f8446e6b h1:TIGlA8cL4FOacWENlcC9ewlVP8bn6Q8Sq9g7lkJalow=
 github.com/orijtech/arxiv v0.0.0-20180404200544-d693f8446e6b/go.mod h1:hNGNaeHuU29nnxSCsjCkZEIAZ0IdxkPIELPeXg7i1Mo=
 github.com/orijtech/otils v0.0.2 h1:nbdAT171Xo98hOEmfWkuxWnNgoyNscnGMd5YnrXzblg=
