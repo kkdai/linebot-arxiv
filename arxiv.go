@@ -61,18 +61,10 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-
 	data, _ := ioutil.ReadAll(resp.Body)
-	log.Println("data=:", data)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
-
 	log.Println("Title:", entry.Entry[0].Title)
-	log.Println("Summary:", entry.Entry[0].Summary)
-	log.Println("Authors:")
-	for _, author := range entry.Entry[0].Author {
-		log.Println(" -", author.Name)
-	}
 	return entry.Entry
 }

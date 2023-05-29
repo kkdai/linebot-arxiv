@@ -236,7 +236,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	newFavoriteArticle := values.Get("url")
 	uid := values.Get("user_id")
 	extraAct := values.Get("extra")
-	var toggleMessage string
+	var toggleMessage = "已新增至最愛"
 	newUser := models.UserFavorite{
 		UserId:    uid,
 		Favorites: []string{newFavoriteArticle},
@@ -244,18 +244,18 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	if record, err := DB.Get(uid); err != nil {
 		log.Println("User data is not created, create a new one")
 		DB.Add(newUser)
+		log.Println(newFavoriteArticle, "Add user/fav")
 	} else {
 		log.Println("Record found, update it", record)
 		oldRecords := record.Favorites
 
 		if exist, idx := InArray(newFavoriteArticle, oldRecords); exist == true {
-			log.Println(newFavoriteArticle, "已存在，移除")
+			log.Println(newFavoriteArticle, "Del fav")
 			oldRecords = RemoveStringItem(oldRecords, idx)
 			toggleMessage = "已從最愛中移除"
 		} else {
-			log.Println(newFavoriteArticle, "新增最愛")
+			log.Println(newFavoriteArticle, "Add fav")
 			oldRecords = append(oldRecords, newFavoriteArticle)
-			toggleMessage = "已新增至最愛"
 		}
 		record.Favorites = oldRecords
 		DB.Update(record)
