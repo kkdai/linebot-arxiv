@@ -61,6 +61,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					values := url.Values{}
 					values.Set("user_id", event.Source.UserID)
 					values.Set("url", message.Text)
+					values.Set("extra", "gpt")
 					actionBookmarkArticle(event, values)
 					return
 				}
@@ -234,6 +235,7 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	newFavoriteArticle := values.Get("url")
 	uid := values.Get("user_id")
+	extraAct := values.Get("extra")
 	var toggleMessage string
 	newUser := models.UserFavorite{
 		UserId:    uid,
@@ -259,11 +261,19 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 		DB.Update(record)
 	}
 
+	var gptRet string
 	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
-	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
-		log.Println(err)
+	if strings.Compare(extraAct, "gpt") == 0 {
+		result := getArticleByURL(newFavoriteArticle)
+		gptRet = gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret), linebot.NewTextMessage(gptRet)).Do(); err != nil {
+			log.Println(err)
+		}
+	} else {
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
+			log.Println(err)
+		}
 	}
-
 }
 
 func truncateString(s string, maxLength int) string {
