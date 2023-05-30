@@ -216,7 +216,7 @@ func actionGetDetail(event *linebot.Event, values url.Values) {
 	for _, a := range result[0].Author {
 		authors = fmt.Sprintf("%s\n%s", authors, a.Name)
 	}
-	content := fmt.Sprintf("論文： %s \n作者: \n %s \n摘要: \n %s \n論文網址: \n%s", result[0].Title, authors, result[0].Summary.Body, result[0].Link[1].Href)
+	content := fmt.Sprintf("論文： %s \n作者: \n %s \n摘要: \n %s \n論文網址: \n%s \nPDF: \n%s", result[0].Title, authors, result[0].Summary.Body, result[0].ID, result[0].Link[1].Href)
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(content)).Do(); err != nil {
 		log.Println(err)
 	}
