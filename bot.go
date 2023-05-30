@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/kkdai/linebot-arxiv/models"
+	"github.com/kkdai/favdb"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/marvin-hansen/arxiv/v1"
 )
@@ -237,7 +237,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	uid := values.Get("user_id")
 	extraAct := values.Get("extra")
 	var toggleMessage = "已新增至最愛"
-	newUser := models.UserFavorite{
+	newUser := favdb.UserFavorite{
 		UserId:    uid,
 		Favorites: []string{newFavoriteArticle},
 	}
