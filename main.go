@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kkdai/linebot-arxiv/models"
+	"github.com/kkdai/favdb"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	gpt3 "github.com/sashabaranov/go-openai"
 )
@@ -26,7 +26,7 @@ import (
 var bot *linebot.Client
 var client *gpt3.Client
 
-var DB models.UserFavData
+var DB favdb.UserFavData
 
 type GPT_ACTIONS int
 
@@ -51,9 +51,9 @@ func main() {
 	gitUrl := os.Getenv("GITHUB_URL")
 	if gitUrl != "" {
 		// Use Github Issue as DB.
-		DB = models.NewGithubDB(gitUrl)
+		DB = favdb.NewGithubDB(gitUrl)
 	} else {
-		DB = models.NewMemDB()
+		DB = favdb.NewMemDB()
 	}
 
 	http.HandleFunc("/callback", callbackHandler)
