@@ -30,7 +30,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.9.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/kkdai/favdb v0.1.1 // indirect
+	github.com/kkdai/favdb v0.2.1 // indirect
 	github.com/orijtech/otils v0.0.2 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
