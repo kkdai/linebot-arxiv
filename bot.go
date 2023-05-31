@@ -21,6 +21,8 @@ const (
 	ActionBookmarkArticle string = "BookmarkArticle"
 	ActionHelp            string = "Menu"
 	ActonShowFav          string = "MyFavs"
+	ActionNewest          string = "Newest"
+	ActionRandom          string = "Random"
 )
 
 type Intent struct {
@@ -65,6 +67,10 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					values.Set("url", message.Text)
 					values.Set("extra", "gpt")
 					actionBookmarkArticle(event, values)
+					return
+				} else if strings.EqualFold(message.Text, "menu") {
+					template := getMenuButtonTemplate(event, "論文收集")
+					sendCarouselMessage(event, template, "我能為您做什麼？")
 					return
 				}
 
@@ -343,4 +349,23 @@ func actionShowFavorite(event *linebot.Event, values url.Values) {
 		template.Columns = append(template.Columns, tmpColumn)
 		sendCarouselMessage(event, template, "收藏的論文已送達")
 	}
+}
+
+func getMenuButtonTemplate(event *linebot.Event, title string) (template *linebot.CarouselTemplate) {
+	columnList := []*linebot.CarouselColumn{}
+	dataNewlest := fmt.Sprintf("action=%s&page=0", ActionNewest)
+	dataRandom := fmt.Sprintf("action=%s", ActionRandom)
+	dataShowFav := fmt.Sprintf("action=%s&user_id=%s&page=0", ActonShowFav, event.Source.UserID)
+
+	menu1 := linebot.NewCarouselColumn(
+		Image_URL,
+		title,
+		"你可以試試看以下選項，或直接輸入關鍵字查詢",
+		linebot.NewPostbackAction(ActionNewest, dataNewlest, "", "", "", ""),
+		linebot.NewPostbackAction(ActionRandom, dataRandom, "", "", "", ""),
+		linebot.NewPostbackAction(ActonShowFav, dataShowFav, "", "", "", ""),
+	)
+	columnList = append(columnList, menu1)
+	template = linebot.NewCarouselTemplate(columnList...)
+	return template
 }
