@@ -203,6 +203,9 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 	case ActionNewest:
 		log.Println("ActionNewest:", values)
 		actionNewest(event, values)
+	case ActionRandom:
+		log.Println("ActionRandom:", values)
+		actionRandom(event, values)
 	default:
 		log.Println("Unimplement action handler", action)
 	}
@@ -356,6 +359,14 @@ func actionShowFavorite(event *linebot.Event, values url.Values) {
 
 func actionNewest(event *linebot.Event, values url.Values) {
 	results := getNewest10Articles()
+	template := getCarouseTemplate(event.Source.UserID, results)
+	if template != nil {
+		sendCarouselMessage(event, template, "Paper Result")
+	}
+}
+
+func actionRandom(event *linebot.Event, values url.Values) {
+	results := getRandom10Articles()
 	template := getCarouseTemplate(event.Source.UserID, results)
 	if template != nil {
 		sendCarouselMessage(event, template, "Paper Result")
