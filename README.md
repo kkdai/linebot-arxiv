@@ -8,7 +8,7 @@ Featues
 
 ## Menu
 
-![Show](./img/1-menu.jpg "Display Menu")
+<img src="./img/1-menu.jpg" alt="Show" title="Display Menu" style="zoom: 25%;" />
 
 Press "menu" to display menu
 
@@ -22,26 +22,27 @@ Show the random 10 articles on arXiv.
 
 ### My Favs
 
-![Fav](./img/2-fav.jpg "Show your favorite articles list ")
+<img src="./img/2-fav.jpg" alt="Fav" title="Show your favorite articles list " style="zoom: 25%;" />
 
 Show your favorite articles list.
 
 ## Save your arXiv link to Favorite list
 
-![Save](./img/3-save.jpg "Save to your fav list")
+<img src="./img/3-save.jpg" alt="Save" title="Save to your fav list" style="zoom:25%;" />
 
 Save to your fav list.
 
 ## Query keywords on arXiv
 
-![Query](./img/4-query.jpg "query")
+<img src="./img/4-query.jpg" alt="Query" title="query" style="zoom:25%;" />
 
 Query keywords to find articles on arXiv.
 
 Use it Directly
 =============
 
-<img src="https://qr-official.line.me/gs/M_152uuyrk_GW.png">
+<img src="https://qr-official.line.me/gs/M_152uuyrk_GW.png" alt="LINE OA join" />
+
 
 How to build your own LINE Bot?
 =============
