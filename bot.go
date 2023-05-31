@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/kkdai/favdb"
@@ -19,6 +19,10 @@ const (
 	ActionOpenDetail      string = "DetailArticle"
 	ActionTransArticle    string = "TransArticle"
 	ActionBookmarkArticle string = "BookmarkArticle"
+	ActionHelp            string = "Menu"
+	ActonShowFav          string = "MyFavs"
+	ActionNewest          string = "Newest"
+	ActionRandom          string = "Random"
 )
 
 type Intent struct {
@@ -63,6 +67,10 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					values.Set("url", message.Text)
 					values.Set("extra", "gpt")
 					actionBookmarkArticle(event, values)
+					return
+				} else if strings.EqualFold(message.Text, "menu") {
+					template := getMenuButtonTemplate(event, "論文收集")
+					sendCarouselMessage(event, template, "我能為您做什麼？")
 					return
 				}
 
@@ -122,20 +130,6 @@ func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 			}
 		}
 	}
-}
-
-func isGroupEvent(event *linebot.Event) bool {
-	return event.Source.GroupID != "" || event.Source.RoomID != ""
-}
-
-func getGroupID(event *linebot.Event) string {
-	if event.Source.GroupID != "" {
-		return event.Source.GroupID
-	} else if event.Source.RoomID != "" {
-		return event.Source.RoomID
-	}
-
-	return ""
 }
 
 func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebot.CarouselTemplate) {
@@ -203,6 +197,9 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 		actionBookmarkArticle(event, values)
 		log.Println("Show all article:....")
 		DB.ShowAll()
+	case ActonShowFav:
+		log.Println("ActonShowFav:", values)
+		actionShowFavorite(event, values)
 	default:
 		log.Println("Unimplement action handler", action)
 	}
@@ -276,34 +273,99 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	}
 }
 
-func truncateString(s string, maxLength int) string {
-	if len(s) <= maxLength {
-		return s
-	}
-	return s[:maxLength]
-}
+func actionShowFavorite(event *linebot.Event, values url.Values) {
+	log.Println("actionShowFavorite call")
+	columnCount := 9
+	userId := values.Get("user_id")
 
-// InArray: Check if string item is in array
-func InArray(val interface{}, array interface{}) (exists bool, index int) {
-	exists = false
-	index = -1
+	if currentPage, err := strconv.Atoi(values.Get("page")); err != nil {
+		log.Println("Unable to parse parameters", values)
+	} else {
+		userData, _ := DB.Get(userId)
 
-	switch reflect.TypeOf(array).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(array)
-
-		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
-				index = i
-				exists = true
-				return
-			}
+		// No userData or user has empty Fav, return!
+		if userData == nil || (userData != nil && len(userData.Favorites) == 0) {
+			empStr := "你沒有收藏任何文章，快來加入吧。"
+			// Fav == 0, skip it.
+			empColumn := linebot.NewCarouselColumn(
+				Image_URL,
+				"沒有論文",
+				empStr,
+				linebot.NewMessageAction(ActionHelp, ActionHelp),
+			)
+			emptyResult := linebot.NewCarouselTemplate(empColumn)
+			sendCarouselMessage(event, emptyResult, empStr)
 		}
+
+		startIdx := currentPage * columnCount
+		endIdx := startIdx + columnCount
+		lastPage := false
+
+		// reverse slice
+		for i := len(userData.Favorites)/2 - 1; i >= 0; i-- {
+			opp := len(userData.Favorites) - 1 - i
+			userData.Favorites[i], userData.Favorites[opp] = userData.Favorites[opp], userData.Favorites[i]
+		}
+
+		if endIdx > len(userData.Favorites)-1 || startIdx > endIdx {
+			endIdx = len(userData.Favorites)
+			lastPage = true
+		}
+
+		var favDocuments []*arxiv.Entry
+		favs := userData.Favorites[startIdx:endIdx]
+		log.Println(favs)
+		for i := startIdx; i < endIdx; i++ {
+			url := userData.Favorites[i]
+			tmpRecord := getArticleByURL(url)
+			favDocuments = append(favDocuments, tmpRecord[0])
+		}
+
+		// append next page column
+		previousPage := currentPage - 1
+		if previousPage < 0 {
+			previousPage = 0
+		}
+		nextPage := currentPage + 1
+		previousData := fmt.Sprintf("action=%s&page=%d&user_id=%s", ActonShowFav, previousPage, userId)
+		nextData := fmt.Sprintf("action=%s&page=%d&user_id=%s", ActonShowFav, nextPage, userId)
+		previousText := fmt.Sprintf("上一頁 %d", previousPage)
+		nextText := fmt.Sprintf("下一頁 %d", nextPage)
+		if lastPage == true {
+			nextData = "--"
+			nextText = "--"
+		}
+
+		tmpColumn := linebot.NewCarouselColumn(
+			Image_URL,
+			"沒有論文",
+			"繼續看？",
+			linebot.NewMessageAction(ActionHelp, ActionHelp),
+			linebot.NewPostbackAction(previousText, previousData, "", "", "", ""),
+			linebot.NewPostbackAction(nextText, nextData, "", "", "", ""),
+		)
+
+		template := getCarouseTemplate(event.Source.UserID, favDocuments)
+		template.Columns = append(template.Columns, tmpColumn)
+		sendCarouselMessage(event, template, "收藏的論文已送達")
 	}
-	return
 }
 
-// RemoveStringItem: Remove string item from slice
-func RemoveStringItem(slice []string, s int) []string {
-	return append(slice[:s], slice[s+1:]...)
+func getMenuButtonTemplate(event *linebot.Event, title string) (template *linebot.CarouselTemplate) {
+	columnList := []*linebot.CarouselColumn{}
+	dataNewlest := fmt.Sprintf("action=%s&page=0", ActionNewest)
+	dataRandom := fmt.Sprintf("action=%s", ActionRandom)
+	dataShowFav := fmt.Sprintf("action=%s&user_id=%s&page=0", ActonShowFav, event.Source.UserID)
+
+	menu1 := linebot.NewCarouselColumn(
+		Image_URL,
+		title,
+		"你可以試試看以下選項，或直接輸入關鍵字查詢",
+		linebot.NewPostbackAction(ActionNewest, dataNewlest, "", "", "", ""),
+		linebot.NewPostbackAction(ActionRandom, dataRandom, "", "", "", ""),
+		linebot.NewPostbackAction(ActonShowFav, dataShowFav, "", "", "", ""),
+	)
+	columnList = append(columnList, menu1)
+	template = linebot.NewCarouselTemplate(columnList...)
+	return template
 }
