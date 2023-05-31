@@ -1,6 +1,10 @@
 package main
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/line/line-bot-sdk-go/v7/linebot"
+)
 
 func truncateString(s string, maxLength int) string {
 	if len(s) <= maxLength {
@@ -32,4 +36,18 @@ func InArray(val interface{}, array interface{}) (exists bool, index int) {
 // RemoveStringItem: Remove string item from slice
 func RemoveStringItem(slice []string, s int) []string {
 	return append(slice[:s], slice[s+1:]...)
+}
+
+func isGroupEvent(event *linebot.Event) bool {
+	return event.Source.GroupID != "" || event.Source.RoomID != ""
+}
+
+func getGroupID(event *linebot.Event) string {
+	if event.Source.GroupID != "" {
+		return event.Source.GroupID
+	} else if event.Source.RoomID != "" {
+		return event.Source.RoomID
+	}
+
+	return ""
 }

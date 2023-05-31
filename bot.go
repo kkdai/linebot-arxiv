@@ -126,20 +126,6 @@ func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 	}
 }
 
-func isGroupEvent(event *linebot.Event) bool {
-	return event.Source.GroupID != "" || event.Source.RoomID != ""
-}
-
-func getGroupID(event *linebot.Event) string {
-	if event.Source.GroupID != "" {
-		return event.Source.GroupID
-	} else if event.Source.RoomID != "" {
-		return event.Source.RoomID
-	}
-
-	return ""
-}
-
 func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebot.CarouselTemplate) {
 	if len(records) == 0 {
 		log.Println("err1")
