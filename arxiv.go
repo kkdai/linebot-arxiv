@@ -107,7 +107,12 @@ func getRandom10Articles() []*arxiv.Entry {
 
 	var ret []*arxiv.Entry
 	for i := 0; i < 10; i++ {
-		ret[i] = entry.Entry[rands[i]]
+		item := arxiv.Entry{
+			Title: entry.Entry[rands[i]].Title,
+			ID:    entry.Entry[rands[i]].ID,
+		}
+
+		ret = append(ret, &item)
 	}
 	return ret
 }
