@@ -200,6 +200,9 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 	case ActonShowFav:
 		log.Println("ActonShowFav:", values)
 		actionShowFavorite(event, values)
+	case ActionNewest:
+		log.Println("ActionNewest:", values)
+		actionNewest(event, values)
 	default:
 		log.Println("Unimplement action handler", action)
 	}
@@ -348,6 +351,14 @@ func actionShowFavorite(event *linebot.Event, values url.Values) {
 		template := getCarouseTemplate(event.Source.UserID, favDocuments)
 		template.Columns = append(template.Columns, tmpColumn)
 		sendCarouselMessage(event, template, "收藏的論文已送達")
+	}
+}
+
+func actionNewest(event *linebot.Event, values url.Values) {
+	results := getNewest10Articles()
+	template := getCarouseTemplate(event.Source.UserID, results)
+	if template != nil {
+		sendCarouselMessage(event, template, "Paper Result")
 	}
 }
 

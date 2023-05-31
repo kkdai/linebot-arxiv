@@ -13,6 +13,11 @@ import (
 	"github.com/marvin-hansen/arxiv/v1"
 )
 
+const (
+	SearchByID = "https://export.arxiv.org/api/query?id_list="
+	GetNewest  = "http://export.arxiv.org/api/query?search_query=all:electron&start=0&max_results=10&sortBy=submittedDate&sortOrder=descending"
+)
+
 // getArxivArticle:
 func getArxivArticle(keyword string) []*arxiv.Entry {
 	resChan, _, err := arxiv.Search(context.Background(), &arxiv.Query{
@@ -54,8 +59,8 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 		return nil
 	}
 
-	log.Println("Going to:", "https://export.arxiv.org/api/query?id_list="+idStr)
-	resp, err := http.Get("https://export.arxiv.org/api/query?id_list=" + idStr)
+	log.Println("Going to:", SearchByID+idStr)
+	resp, err := http.Get(SearchByID + idStr)
 	if err != nil {
 		log.Println("Error:", err)
 		return nil
@@ -65,6 +70,21 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
-	log.Println("Title:", entry.Entry[0].Title)
+	log.Println("Get by ID for Title:", entry.Entry[0].Title)
+	return entry.Entry
+}
+
+func getNewest10Articles() []*arxiv.Entry {
+	log.Println("Going to:", GetNewest)
+	resp, err := http.Get(GetNewest)
+	if err != nil {
+		log.Println("Error:", err)
+		return nil
+	}
+	defer resp.Body.Close()
+	data, _ := ioutil.ReadAll(resp.Body)
+
+	var entry arxiv.Feed
+	xml.Unmarshal(data, &entry)
 	return entry.Entry
 }
