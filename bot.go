@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/kkdai/favdb"
@@ -18,6 +19,8 @@ const (
 	ActionOpenDetail      string = "DetailArticle"
 	ActionTransArticle    string = "TransArticle"
 	ActionBookmarkArticle string = "BookmarkArticle"
+	ActionHelp            string = "Menu"
+	ActonShowFav          string = "MyFavs"
 )
 
 type Intent struct {
@@ -272,5 +275,83 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
 			log.Println(err)
 		}
+	}
+}
+
+func actionShowFavorite(event *linebot.Event, action string, values url.Values) {
+	log.Println("actionShowFavorite call")
+	columnCount := 9
+	userId := values.Get("user_id")
+
+	if currentPage, err := strconv.Atoi(values.Get("page")); err != nil {
+		log.Println("Unable to parse parameters", values)
+	} else {
+		userData, _ := DB.Get(userId)
+
+		// No userData or user has empty Fav, return!
+		if userData == nil || (userData != nil && len(userData.Favorites) == 0) {
+			empStr := "你沒有收藏任何文章，快來加入吧。"
+			// Fav == 0, skip it.
+			empColumn := linebot.NewCarouselColumn(
+				Image_URL,
+				"沒有論文",
+				empStr,
+				linebot.NewMessageAction(ActionHelp, ActionHelp),
+			)
+			emptyResult := linebot.NewCarouselTemplate(empColumn)
+			sendCarouselMessage(event, emptyResult, empStr)
+		}
+
+		startIdx := currentPage * columnCount
+		endIdx := startIdx + columnCount
+		lastPage := false
+
+		// reverse slice
+		for i := len(userData.Favorites)/2 - 1; i >= 0; i-- {
+			opp := len(userData.Favorites) - 1 - i
+			userData.Favorites[i], userData.Favorites[opp] = userData.Favorites[opp], userData.Favorites[i]
+		}
+
+		if endIdx > len(userData.Favorites)-1 || startIdx > endIdx {
+			endIdx = len(userData.Favorites)
+			lastPage = true
+		}
+
+		var favDocuments []*arxiv.Entry
+		favs := userData.Favorites[startIdx:endIdx]
+		log.Println(favs)
+		for i := startIdx; i < endIdx; i++ {
+			url := userData.Favorites[i]
+			tmpRecord := getArticleByURL(url)
+			favDocuments = append(favDocuments, tmpRecord[0])
+		}
+
+		// append next page column
+		previousPage := currentPage - 1
+		if previousPage < 0 {
+			previousPage = 0
+		}
+		nextPage := currentPage + 1
+		previousData := fmt.Sprintf("action=%s&page=%d&user_id=%s", ActonShowFav, previousPage, userId)
+		nextData := fmt.Sprintf("action=%s&page=%d&user_id=%s", ActonShowFav, nextPage, userId)
+		previousText := fmt.Sprintf("上一頁 %d", previousPage)
+		nextText := fmt.Sprintf("下一頁 %d", nextPage)
+		if lastPage == true {
+			nextData = "--"
+			nextText = "--"
+		}
+
+		tmpColumn := linebot.NewCarouselColumn(
+			Image_URL,
+			"沒有論文",
+			"繼續看？",
+			linebot.NewMessageAction(ActionHelp, ActionHelp),
+			linebot.NewPostbackAction(previousText, previousData, "", "", "", ""),
+			linebot.NewPostbackAction(nextText, nextData, "", "", "", ""),
+		)
+
+		template := getCarouseTemplate(event.Source.UserID, favDocuments)
+		template.Columns = append(template.Columns, tmpColumn)
+		sendCarouselMessage(event, template, "收藏的論文已送達")
 	}
 }
