@@ -3,7 +3,47 @@ ChatGPT LINE Bot for Arxiv
 
 [![GoDoc](https://godoc.org/github.com/kkdai/linebot-arxiv.svg?status.svg)](https://godoc.org/github.com/kkdai/linebot-arxiv)  ![Go](https://github.com/kkdai/linebot-arxiv/workflows/Go/badge.svg) [![goreportcard.com](https://goreportcard.com/badge/github.com/kkdai/linebot-arxiv)](https://goreportcard.com/report/github.com/kkdai/LineBotTemplate)
 
-How to use this
+Featues
+=============
+
+## Menu
+
+![Show](./img/1-menu.jpg "Display Menu")
+
+Press "menu" to display menu
+
+### Newest
+
+Show the newest article on arXiv.
+
+### Random Articles
+
+Show the random 10 articles on arXiv.
+
+### My Favs
+
+![Fav](./img/2-fav.jpg "Show your favorite articles list ")
+
+Show your favorite articles list.
+
+## Save your arXiv link to Favorite list
+
+![Save](./img/3-save.jpg "Save to your fav list")
+
+Save to your fav list.
+
+## Query keywords on arXiv
+
+![Query](./img/4-query.jpg "query")
+
+Query keywords to find articles on arXiv.
+
+Use it Directly
+=============
+
+<img src="https://qr-official.line.me/gs/M_152uuyrk_GW.png">
+
+How to build your own LINE Bot?
 =============
 
 ### To obtain a LINE Bot API developer account
