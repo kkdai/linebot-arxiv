@@ -16,6 +16,7 @@ import (
 const (
 	SearchByID = "https://export.arxiv.org/api/query?id_list="
 	GetNewest  = "http://export.arxiv.org/api/query?search_query=all:electron&start=0&max_results=10&sortBy=submittedDate&sortOrder=descending"
+	Random100  = "http://export.arxiv.org/api/query?search_query=all:electron&start=0&max_results=100"
 )
 
 // getArxivArticle:
@@ -87,4 +88,26 @@ func getNewest10Articles() []*arxiv.Entry {
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
 	return entry.Entry
+}
+
+func getRandom10Articles() []*arxiv.Entry {
+	log.Println("Going to:", Random100)
+	resp, err := http.Get(Random100)
+	if err != nil {
+		log.Println("Error:", err)
+		return nil
+	}
+	defer resp.Body.Close()
+	data, _ := ioutil.ReadAll(resp.Body)
+
+	var entry arxiv.Feed
+	xml.Unmarshal(data, &entry)
+
+	rands := GetRandomIntSet(100, 10)
+
+	var ret []*arxiv.Entry
+	for i := 0; i < 10; i++ {
+		ret[i] = entry.Entry[rands[i]]
+	}
+	return ret
 }

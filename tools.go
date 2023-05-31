@@ -1,7 +1,9 @@
 package main
 
 import (
+	"math/rand"
 	"reflect"
+	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
@@ -50,4 +52,12 @@ func getGroupID(event *linebot.Event) string {
 	}
 
 	return ""
+}
+
+// GetRandomIntSet: Get random int set
+func GetRandomIntSet(max int, count int) (randInts []int) {
+	rand.Seed(time.Now().UnixNano())
+	list := rand.Perm(max)
+	randInts = list[:count]
+	return randInts
 }
