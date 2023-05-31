@@ -191,6 +191,9 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 		actionBookmarkArticle(event, values)
 		log.Println("Show all article:....")
 		DB.ShowAll()
+	case ActonShowFav:
+		log.Println("ActonShowFav:", values)
+		actionShowFavorite(event, values)
 	default:
 		log.Println("Unimplement action handler", action)
 	}
@@ -264,7 +267,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	}
 }
 
-func actionShowFavorite(event *linebot.Event, action string, values url.Values) {
+func actionShowFavorite(event *linebot.Event, values url.Values) {
 	log.Println("actionShowFavorite call")
 	columnCount := 9
 	userId := values.Get("user_id")
