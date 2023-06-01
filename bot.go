@@ -249,19 +249,22 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 		DB.Add(newUser)
 		log.Println(newFavoriteArticle, "Add user/fav")
 	} else {
-		log.Println("Record found, update it", record)
-		oldRecords := record.Favorites
+		// from link to chatbot. skip removed only show summary.
+		if strings.Compare(extraAct, "gpt") != 0 {
+			log.Println("Record found, update it", record)
+			oldRecords := record.Favorites
 
-		if exist, idx := InArray(newFavoriteArticle, oldRecords); exist == true {
-			log.Println(newFavoriteArticle, "Del fav")
-			oldRecords = RemoveStringItem(oldRecords, idx)
-			toggleMessage = "已從最愛中移除"
-		} else {
-			log.Println(newFavoriteArticle, "Add fav")
-			oldRecords = append(oldRecords, newFavoriteArticle)
+			if exist, idx := InArray(newFavoriteArticle, oldRecords); exist == true {
+				log.Println(newFavoriteArticle, "Del fav")
+				oldRecords = RemoveStringItem(oldRecords, idx)
+				toggleMessage = "已從最愛中移除"
+			} else {
+				log.Println(newFavoriteArticle, "Add fav")
+				oldRecords = append(oldRecords, newFavoriteArticle)
+			}
+			record.Favorites = oldRecords
+			DB.Update(record)
 		}
-		record.Favorites = oldRecords
-		DB.Update(record)
 	}
 
 	var gptRet string
@@ -269,7 +272,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	if strings.Compare(extraAct, "gpt") == 0 {
 		result := getArticleByURL(newFavoriteArticle)
 		gptRet = gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
-		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret), linebot.NewTextMessage(gptRet)).Do(); err != nil {
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret), linebot.NewTextMessage("論文位置在："+newFavoriteArticle), linebot.NewTextMessage(gptRet)).Do(); err != nil {
 			log.Println(err)
 		}
 	} else {
