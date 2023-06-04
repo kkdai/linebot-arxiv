@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"reflect"
+	"regexp"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -60,4 +61,12 @@ func GetRandomIntSet(max int, count int) (randInts []int) {
 	list := rand.Perm(max)
 	randInts = list[:count]
 	return randInts
+}
+
+// AddLineBreaksAroundURLs takes a string as input, finds URLs,
+// and inserts a newline character before and after each URL.
+// It returns the modified string.
+func AddLineBreaksAroundURLs(input string) string {
+	re := regexp.MustCompile(`(https?:\/\/[^\s\p{Han}]+)`)
+	return re.ReplaceAllString(input, "\n$1\n")
 }
