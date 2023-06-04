@@ -134,7 +134,7 @@ func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 
 func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebot.CarouselTemplate) {
 	if len(records) == 0 {
-		log.Println("err1")
+		log.Println("err: Empty articles.")
 		return nil
 	}
 
