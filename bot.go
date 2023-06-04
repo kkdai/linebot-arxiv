@@ -230,6 +230,10 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	log.Println("actionGPTTranslate: url=", url)
 	result := getArticleByURL(url)
 	gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+
+	//Doing url handle if it in gpt summarization.
+	gptRet = AddLineBreaksAroundURLs(gptRet)
+
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(gptRet)).Do(); err != nil {
 		log.Println(err)
 	}
