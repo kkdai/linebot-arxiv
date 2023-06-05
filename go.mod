@@ -9,6 +9,7 @@ require (
 	github.com/kkdai/favdb v0.2.2
 	github.com/marvin-hansen/arxiv v0.1.2
 	github.com/sashabaranov/go-openai v1.5.0
+	github.com/stretchr/testify v1.8.1
 )
 
 require (
@@ -19,6 +20,7 @@ require (
 	cloud.google.com/go/longrunning v0.5.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230528122434-6f98819771a1 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-pg/pg/v10 v10.11.0 // indirect
 	github.com/go-pg/zerochecker v0.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -31,6 +33,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/orijtech/otils v0.0.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
@@ -52,5 +55,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/grpc v1.55.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
