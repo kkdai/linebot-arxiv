@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -67,6 +68,10 @@ func GetRandomIntSet(max int, count int) (randInts []int) {
 // and inserts a newline character before and after each URL.
 // It returns the modified string.
 func AddLineBreaksAroundURLs(input string) string {
-	re := regexp.MustCompile(`(https?:\/\/[^\s\p{Han}]+)`)
-	return re.ReplaceAllString(input, "\n$1\n")
+	re := regexp.MustCompile(`(https?:\/\/[\w\/\?\&\.\-]+)`)
+	matches := re.FindAllString(input, -1)
+	for _, match := range matches {
+		input = strings.Replace(input, match, "\n"+match+"\n", 1)
+	}
+	return input
 }

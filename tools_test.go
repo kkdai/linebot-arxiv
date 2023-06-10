@@ -82,10 +82,28 @@ func TestGetRandomIntSet(t *testing.T) {
 	res = GetRandomIntSet(10, 5)
 	assert.Equal(t, 5, len(res), "Should return slice of specified length")
 }
-
 func TestAddLineBreaksAroundURLs(t *testing.T) {
-	input := "Check out this website https://example.com and this one http://another-example.com"
-	expected := "Check out this website \nhttps://example.com\n and this one \nhttp://another-example.com\n"
-	res := AddLineBreaksAroundURLs(input)
-	assert.Equal(t, expected, res, "Should correctly insert line breaks around URLs")
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			input:    "Check out this website https://example.com and this one http://another-example.com",
+			expected: "Check out this website \nhttps://example.com\n and this one \nhttp://another-example.com\n",
+		},
+		{
+			input:    "Here is an URL with dot at the end https://voyager.minedojo.org/。",
+			expected: "Here is an URL with dot at the end \nhttps://voyager.minedojo.org/\n。",
+		},
+		{
+			input:    "This is another test https://example.com我們",
+			expected: "This is another test \nhttps://example.com\n我們",
+		},
+		// Add more test cases here as needed
+	}
+
+	for _, tt := range tests {
+		res := AddLineBreaksAroundURLs(tt.input)
+		assert.Equal(t, tt.expected, res, "Should correctly insert line breaks around URLs")
+	}
 }
