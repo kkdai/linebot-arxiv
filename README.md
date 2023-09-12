@@ -38,12 +38,6 @@ Save to your fav list.
 
 Query keywords to find articles on arXiv.
 
-Use it Directly
-=============
-
-<a href="https://lin.ee/F9mSXsK">
-<img src="./img/qr-code.png" alt="LINE OA join" />
-</a>
 
 How to build your own LINE Bot?
 =============
