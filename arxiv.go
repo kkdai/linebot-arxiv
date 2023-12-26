@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/marvin-hansen/arxiv/v1"
@@ -121,25 +122,27 @@ func getRandom10Articles() []*arxiv.Entry {
 	return ret
 }
 
-// ExtractPaperIDFromURL takes a URL string and returns the arXiv URL if the URL is from huggingface.co
-func ExtractPaperIDFromURL(link string) (string, error) {
+// NormalizeArxivURL takes a URL string and returns a normalized arXiv URL in the format https://arxiv.org/abs/xxxx.xxx.x
+func NormalizeArxivURL(link string) (string, error) {
 	// Parse the URL
 	parsedURL, err := url.Parse(link)
 	if err != nil {
 		return "", err
 	}
 
-	// Check if the host is huggingface.co
-	if parsedURL.Host != "huggingface.co" {
-		return "", errors.New("URL does not belong to huggingface.co")
+	// Check if the host is arxiv.org or huggingface.co
+	if parsedURL.Host != "arxiv.org" && parsedURL.Host != "huggingface.co" {
+		return "", errors.New("URL does not belong to arxiv.org or huggingface.co")
 	}
 
-	// Split the path and extract the paper ID
-	pathSegments := strings.Split(parsedURL.Path, "/")
-	if len(pathSegments) > 2 && pathSegments[1] == "papers" {
-		// Return the arXiv URL with the extracted paper ID
-		return fmt.Sprintf("https://arxiv.org/abs/%s", pathSegments[2]), nil
+	// Extract the paper ID using a regular expression
+	re := regexp.MustCompile(`(\d{4}\.\d{4,5}(v\d+)?)`)
+	matches := re.FindStringSubmatch(parsedURL.Path)
+	if matches == nil {
+		return "", errors.New("URL does not contain a valid arXiv ID")
 	}
+	paperID := matches[1]
 
-	return "", errors.New("URL does not contain a paper ID")
+	// Return the normalized arXiv URL
+	return "https://arxiv.org/abs/" + paperID, nil
 }

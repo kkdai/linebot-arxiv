@@ -61,10 +61,10 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					// 如果聊天機器人在群組中，不回覆訊息。
 					return
 				}
-				if strings.Contains(message.Text, "arxiv.org/abs") || strings.Contains(message.Text, "huggingface.co/papers") {
+				if refineURL, err := NormalizeArxivURL(message.Text); err == nil {
 					values := url.Values{}
 					values.Set("user_id", event.Source.UserID)
-					values.Set("url", message.Text)
+					values.Set("url", refineURL)
 					values.Set("extra", "gpt")
 					actionBookmarkArticle(event, values)
 					return
