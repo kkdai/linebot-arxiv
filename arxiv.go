@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -67,7 +68,7 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -83,7 +84,7 @@ func getNewest10Articles() []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -98,7 +99,7 @@ func getRandom10Articles() []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -118,4 +119,26 @@ func getRandom10Articles() []*arxiv.Entry {
 		ret = append(ret, &item)
 	}
 	return ret
+}
+
+// ExtractPaperIDFromURL takes a URL string and returns the paper ID if the URL is from huggingface.co
+func ExtractPaperIDFromURL(link string) (string, error) {
+	// Parse the URL
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return "", err
+	}
+
+	// Check if the host is huggingface.co
+	if parsedURL.Host != "huggingface.co" {
+		return "", errors.New("URL does not belong to huggingface.co")
+	}
+
+	// Split the path and extract the paper ID
+	pathSegments := strings.Split(parsedURL.Path, "/")
+	if len(pathSegments) > 2 && pathSegments[1] == "papers" {
+		return pathSegments[2], nil
+	}
+
+	return "", errors.New("URL does not contain a paper ID")
 }
