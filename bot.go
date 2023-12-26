@@ -61,10 +61,10 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					// 如果聊天機器人在群組中，不回覆訊息。
 					return
 				}
-				if strings.Contains(message.Text, "arxiv.org/abs") {
+				if refineURL, err := NormalizeArxivURL(message.Text); err == nil {
 					values := url.Values{}
 					values.Set("user_id", event.Source.UserID)
-					values.Set("url", message.Text)
+					values.Set("url", refineURL)
 					values.Set("extra", "gpt")
 					actionBookmarkArticle(event, values)
 					return
@@ -225,6 +225,7 @@ func actionGetDetail(event *linebot.Event, values url.Values) {
 	}
 }
 
+// actionGPTTranslate: Translate article by GPT-3.
 func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	url := values.Get("url")
 	log.Println("actionGPTTranslate: url=", url)
@@ -239,6 +240,7 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	}
 }
 
+// actionBookmarkArticle: Add or remove article from favorite list.
 func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	newFavoriteArticle := values.Get("url")
 	uid := values.Get("user_id")
@@ -286,6 +288,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	}
 }
 
+// actionShowFavorite: Show favorite article list.
 func actionShowFavorite(event *linebot.Event, values url.Values) {
 	log.Println("actionShowFavorite call")
 	columnCount := 9
@@ -364,6 +367,7 @@ func actionShowFavorite(event *linebot.Event, values url.Values) {
 	}
 }
 
+// actionNewest: Show newest 10 articles.
 func actionNewest(event *linebot.Event, values url.Values) {
 	results := getNewest10Articles()
 	template := getCarouseTemplate(event.Source.UserID, results)
@@ -372,6 +376,7 @@ func actionNewest(event *linebot.Event, values url.Values) {
 	}
 }
 
+// actionRandom: Show random 10 articles.
 func actionRandom(event *linebot.Event, values url.Values) {
 	results := getRandom10Articles()
 	template := getCarouseTemplate(event.Source.UserID, results)
@@ -380,6 +385,7 @@ func actionRandom(event *linebot.Event, values url.Values) {
 	}
 }
 
+// getMenuButtonTemplate: Get menu button template.
 func getMenuButtonTemplate(event *linebot.Event, title string) (template *linebot.CarouselTemplate) {
 	columnList := []*linebot.CarouselColumn{}
 	dataNewlest := fmt.Sprintf("action=%s&page=0", ActionNewest)

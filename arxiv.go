@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/marvin-hansen/arxiv/v1"
@@ -67,7 +69,7 @@ func getArticleByURL(urlStr string) []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -83,7 +85,7 @@ func getNewest10Articles() []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -98,7 +100,7 @@ func getRandom10Articles() []*arxiv.Entry {
 		return nil
 	}
 	defer resp.Body.Close()
-	data, _ := ioutil.ReadAll(resp.Body)
+	data, _ := io.ReadAll(resp.Body)
 
 	var entry arxiv.Feed
 	xml.Unmarshal(data, &entry)
@@ -118,4 +120,29 @@ func getRandom10Articles() []*arxiv.Entry {
 		ret = append(ret, &item)
 	}
 	return ret
+}
+
+// NormalizeArxivURL takes a URL string and returns a normalized arXiv URL in the format https://arxiv.org/abs/xxxx.xxx.x
+func NormalizeArxivURL(link string) (string, error) {
+	// Parse the URL
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return "", err
+	}
+
+	// Check if the host is arxiv.org or huggingface.co
+	if parsedURL.Host != "arxiv.org" && parsedURL.Host != "huggingface.co" {
+		return "", errors.New("URL does not belong to arxiv.org or huggingface.co")
+	}
+
+	// Extract the paper ID using a regular expression
+	re := regexp.MustCompile(`(\d{4}\.\d{4,5}(v\d+)?)`)
+	matches := re.FindStringSubmatch(parsedURL.Path)
+	if matches == nil {
+		return "", errors.New("URL does not contain a valid arXiv ID")
+	}
+	paperID := matches[1]
+
+	// Return the normalized arXiv URL
+	return "https://arxiv.org/abs/" + paperID, nil
 }
