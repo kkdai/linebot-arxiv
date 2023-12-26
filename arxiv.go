@@ -121,7 +121,7 @@ func getRandom10Articles() []*arxiv.Entry {
 	return ret
 }
 
-// ExtractPaperIDFromURL takes a URL string and returns the paper ID if the URL is from huggingface.co
+// ExtractPaperIDFromURL takes a URL string and returns the arXiv URL if the URL is from huggingface.co
 func ExtractPaperIDFromURL(link string) (string, error) {
 	// Parse the URL
 	parsedURL, err := url.Parse(link)
@@ -137,7 +137,8 @@ func ExtractPaperIDFromURL(link string) (string, error) {
 	// Split the path and extract the paper ID
 	pathSegments := strings.Split(parsedURL.Path, "/")
 	if len(pathSegments) > 2 && pathSegments[1] == "papers" {
-		return pathSegments[2], nil
+		// Return the arXiv URL with the extracted paper ID
+		return fmt.Sprintf("https://arxiv.org/abs/%s", pathSegments[2]), nil
 	}
 
 	return "", errors.New("URL does not contain a paper ID")
