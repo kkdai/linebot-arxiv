@@ -3,15 +3,12 @@ module github.com/kkdai/linebot-arxiv
 // +heroku goVersion go1.20
 go 1.21
 
-toolchain go1.21.1
-
-require github.com/line/line-bot-sdk-go/v7 v7.19.0
+require github.com/line/line-bot-sdk-go/v7 v7.21.0
 
 require (
 	github.com/google/generative-ai-go v0.11.0
 	github.com/kkdai/favdb v0.2.2
 	github.com/marvin-hansen/arxiv v0.1.2
-	github.com/sashabaranov/go-openai v1.5.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/api v0.177.0
 )
