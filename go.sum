@@ -94,8 +94,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/line/line-bot-sdk-go/v7 v7.19.0 h1:WEbuBBSq65RMMqTn3vIl+Eb4wv2CjhZz7kiw8XTk2Wg=
-github.com/line/line-bot-sdk-go/v7 v7.19.0/go.mod h1:idpoxOZgtSd8JyhctMMpwg5LNgRAIL/QIxa5S0DXcMg=
+github.com/line/line-bot-sdk-go/v7 v7.21.0 h1:eeYMuAwaDV5DZNTRqDipNhzjT51HwEcM1PRPG+cqh4Y=
+github.com/line/line-bot-sdk-go/v7 v7.21.0/go.mod h1:idpoxOZgtSd8JyhctMMpwg5LNgRAIL/QIxa5S0DXcMg=
 github.com/marvin-hansen/arxiv v0.1.2 h1:iszWHAPIYl/WaOi2AvZqZLSIuFhNadzWgstiTEWKxM8=
 github.com/marvin-hansen/arxiv v0.1.2/go.mod h1:dHhy/j0mLoQDYjfJnZnurdctp8cbDN+ZoAhlf9XsZMs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
@@ -115,8 +115,6 @@ github.com/orijtech/otils v0.0.2/go.mod h1:ptnjhGLL7nB/n55+7NbDs96aFkZHtmj4PCFsg
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/sashabaranov/go-openai v1.5.0 h1:4Gr/7g/KtVzW0ddn7TC2aUlyzvhZBIM+qRZ6Ae2kMa0=
-github.com/sashabaranov/go-openai v1.5.0/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
