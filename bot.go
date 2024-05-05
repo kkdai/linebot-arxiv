@@ -88,7 +88,8 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 // parseIntent:
 func parseIntent(msg string) *Intent {
 	gpt1 := fmt.Sprintf(PROMPT_GetIntent, msg)
-	reply := gptCompleteContext(gpt1)
+	ret, _ := GeminiChat(gpt1)
+	reply := printResponse(ret)
 
 	var intent Intent
 	// Unmarshal the JSON data into the struct
@@ -115,19 +116,10 @@ func handleArxivSearch(event *linebot.Event, msg string) {
 func handleGPT(action GPT_ACTIONS, event *linebot.Event, message string) {
 	switch action {
 	case GPT_Complete:
-		reply := gptCompleteContext(message)
+		ret, _ := GeminiChat(message)
+		reply := printResponse(ret)
 		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply)).Do(); err != nil {
 			log.Print(err)
-		}
-	case GPT_Draw:
-		if reply, err := gptImageCreate(message); err != nil {
-			if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("無法正確顯示圖形.")).Do(); err != nil {
-				log.Print(err)
-			}
-		} else {
-			if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("根據你的提示，畫出以下圖片："), linebot.NewImageMessage(reply, reply)).Do(); err != nil {
-				log.Print(err)
-			}
 		}
 	}
 }
@@ -230,10 +222,10 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	url := values.Get("url")
 	log.Println("actionGPTTranslate: url=", url)
 	result := getArticleByURL(url)
-	gptRet := gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
-
+	ret, _ := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+	reply := printResponse(ret)
 	//Doing url handle if it in gpt summarization.
-	gptRet = AddLineBreaksAroundURLs(gptRet)
+	gptRet := AddLineBreaksAroundURLs(reply)
 
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(gptRet)).Do(); err != nil {
 		log.Println(err)
@@ -277,8 +269,10 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
 	if strings.Compare(extraAct, "gpt") == 0 {
 		result := getArticleByURL(newFavoriteArticle)
-		gptRet = gptCompleteContext(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
-		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret), linebot.NewTextMessage("論文位置在："+newFavoriteArticle), linebot.NewTextMessage(gptRet)).Do(); err != nil {
+		ret, _ := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+		reply := printResponse(ret)
+
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply), linebot.NewTextMessage("論文位置在："+newFavoriteArticle), linebot.NewTextMessage(gptRet)).Do(); err != nil {
 			log.Println(err)
 		}
 	} else {

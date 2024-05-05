@@ -16,9 +16,9 @@
     }
   ],
   "env": {
-    "ChatGptToken": {
-      "description": "ChatGPT Access Token",
-      "required": true
+    "GOOGLE_GEMINI_API_KEY": {
+      "description": "Google Gemini Pro API key",
+      "value": "Alxxxxxx"
     },
     "ChannelAccessToken": {
       "description": "Channel Access Token",

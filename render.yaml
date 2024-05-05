@@ -11,5 +11,5 @@ services:
     sync: false
   - key: ChannelSecret
     sync: false
-  - key: ChatGptToken
+  - key: GOOGLE_GEMINI_API_KEY
     sync: false

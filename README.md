@@ -38,7 +38,6 @@ Save to your fav list.
 
 Query keywords to find articles on arXiv.
 
-
 How to build your own LINE Bot?
 =============
 
@@ -52,15 +51,11 @@ Issue a "Channel Access Token" on the "Messaging API" tab.
 
 Open the LINE OA manager from the "Basic Setting" tab and go to the Reply setting on the OA manager. Enable "webhook" there.
 
-### To obtain an OpenAI API token
+### To obtain an Gemini API token
 
-Register for an account on the OpenAI website at <https://openai.com/api/>.
+Register for an account on the Google AI Studio website at <https://aistudio.google.com/app/apikey/>.
 
 Once you have an account, you can find your API token in the account settings page.
-
-If you want to use the OpenAI API for development, you can find more information and instructions in the API documentation page.
-
-Please note that the OpenAI API is only available to users who meet certain criteria. You can find more information about the usage conditions and limitations of the API in the API documentation page.
 
 ### Deploy this on Web Platform
 
