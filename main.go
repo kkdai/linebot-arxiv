@@ -20,20 +20,16 @@ import (
 
 	"github.com/kkdai/favdb"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	gpt3 "github.com/sashabaranov/go-openai"
 )
 
 var bot *linebot.Client
-var client *gpt3.Client
-
 var DB favdb.UserFavData
+var geminiKey string
 
 type GPT_ACTIONS int
 
 const (
 	GPT_Complete GPT_ACTIONS = 0
-	GPT_Draw     GPT_ACTIONS = 1
-	GPT_Whister  GPT_ACTIONS = 2
 )
 
 func main() {
@@ -42,12 +38,9 @@ func main() {
 	log.Println("Bot:", bot, " err:", err)
 
 	port := os.Getenv("PORT")
-	apiKey := os.Getenv("ChatGptToken")
+	geminiKey = os.Getenv("GOOGLE_GEMINI_API_KEY")
 
-	if apiKey != "" {
-		client = gpt3.NewClient(apiKey)
-	}
-
+	// Use Github Issue as DB.
 	gitUrl := os.Getenv("GITHUB_URL")
 	if gitUrl != "" {
 		// Use Github Issue as DB.
