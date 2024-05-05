@@ -50,7 +50,7 @@ func GeminiChat(msg string) (*genai.GenerateContentResponse, error) {
 
 	// For text-only input, use the gemini-pro model
 	model := client.GenerativeModel("gemini-pro")
-	return model.GenerateContent(ctx, genai.Text("Write a story about a magic backpack."))
+	return model.GenerateContent(ctx, genai.Text(msg))
 }
 
 // startNewChatSession	: Start a new chat session
