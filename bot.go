@@ -265,17 +265,18 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 		}
 	}
 
-	var gptRet string
 	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
 	if strings.Compare(extraAct, "gpt") == 0 {
 		result := getArticleByURL(newFavoriteArticle)
 		ret, _ := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
 		reply := printResponse(ret)
 
-		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply), linebot.NewTextMessage("論文位置在："+newFavoriteArticle), linebot.NewTextMessage(gptRet)).Do(); err != nil {
+		log.Println("Gemii response:", reply)
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply), linebot.NewTextMessage("論文位置在："+newFavoriteArticle)).Do(); err != nil {
 			log.Println(err)
 		}
 	} else {
+		log.Println("normal response:", ret)
 		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(ret)).Do(); err != nil {
 			log.Println(err)
 		}
