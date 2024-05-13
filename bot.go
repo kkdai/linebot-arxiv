@@ -268,11 +268,13 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
 	if strings.Compare(extraAct, "gpt") == 0 {
 		result := getArticleByURL(newFavoriteArticle)
-		ret, _ := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
-		reply := printResponse(ret)
+		mkRet, _ := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+		textReply := printResponse(mkRet)
 
-		log.Println("Gemii response:", reply)
-		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(reply), linebot.NewTextMessage("論文位置在："+newFavoriteArticle)).Do(); err != nil {
+		log.Println("Gemini response:", textReply)
+		dataShowFav := fmt.Sprintf("action=%s&user_id=%s&page=0", ActonShowFav, event.Source.UserID)
+		qrBookmark := linebot.NewQuickReplyItems(linebot.NewQuickReplyButton("", linebot.NewPostbackAction(ActonShowFav, dataShowFav, "", "", "", "")))
+		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(textReply), linebot.NewTextMessage("論文位置在："+newFavoriteArticle+"\n 論文已經儲存。").WithQuickReplies(qrBookmark)).Do(); err != nil {
 			log.Println(err)
 		}
 	} else {
