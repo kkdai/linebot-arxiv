@@ -45,6 +45,7 @@ func GeminiChat(msg string) (string, error) {
 	client, err := genai.NewClient(ctx, option.WithAPIKey(geminiKey))
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
 	defer client.Close()
 
@@ -56,35 +57,6 @@ func GeminiChat(msg string) (string, error) {
 		return "", err
 	}
 	return printResponse(modelRet), nil
-}
-
-// startNewChatSession	: Start a new chat session
-func startNewChatSession() *genai.ChatSession {
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, option.WithAPIKey(geminiKey))
-	if err != nil {
-		log.Fatal(err)
-	}
-	model := client.GenerativeModel("gemini-pro")
-	value := float32(ChatTemperture)
-	model.Temperature = &value
-	cs := model.StartChat()
-	return cs
-}
-
-// send: Send a message to the chat session
-func send(cs *genai.ChatSession, msg string) *genai.GenerateContentResponse {
-	if cs == nil {
-		cs = startNewChatSession()
-	}
-
-	ctx := context.Background()
-	log.Printf("== Me: %s\n== Model:\n", msg)
-	res, err := cs.SendMessage(ctx, genai.Text(msg))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return res
 }
 
 // Print response
