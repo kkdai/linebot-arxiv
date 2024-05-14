@@ -40,6 +40,10 @@ numberOfArticle: 0
 }
 ---`
 
+const PROMPT_Summarization = `幫我將以下內容做中文摘要: ---
+ %s
+ ---`
+
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := bot.ParseRequest(r)
 
@@ -112,21 +116,6 @@ func handleArxivSearch(event *linebot.Event, msg string) {
 	template := getCarouseTemplate(event.Source.UserID, results)
 	if template != nil {
 		sendCarouselMessage(event, template, "Paper Result")
-	}
-}
-
-// handleGPT:
-func handleGPT(action GPT_ACTIONS, event *linebot.Event, prompt string) {
-	switch action {
-	case GPT_Complete:
-		result, err := GeminiChat(prompt)
-		if err != nil {
-			log.Println("Error:", err)
-			return
-		}
-		if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(result)).Do(); err != nil {
-			log.Print(err)
-		}
 	}
 }
 
@@ -228,7 +217,7 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 	url := values.Get("url")
 	log.Println("actionGPTTranslate: url=", url)
 	result := getArticleByURL(url)
-	sumResult, err := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+	sumResult, err := GeminiChat(fmt.Sprintf(PROMPT_Summarization, result[0].Summary.Body))
 	if err != nil {
 		log.Println("Error:", err)
 		errString := fmt.Sprintf("Error: %s", err)
@@ -279,7 +268,7 @@ func actionBookmarkArticle(event *linebot.Event, values url.Values) {
 	ret := fmt.Sprintf("文章: \n%s \n%s", newFavoriteArticle, toggleMessage)
 	if strings.Compare(extraAct, "gpt") == 0 {
 		result := getArticleByURL(newFavoriteArticle)
-		sumResult, err := GeminiChat(fmt.Sprintf(`幫我將以下內容做中文摘要: ---\n %s---"`, result[0].Summary.Body))
+		sumResult, err := GeminiChat(fmt.Sprintf(PROMPT_Summarization, result[0].Summary.Body))
 		if err != nil {
 			log.Println("Error:", err)
 			errString := fmt.Sprintf("Error: %s", err)
