@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -87,26 +86,6 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-}
-
-// parseIntent:
-func parseIntent(msg string) *Intent {
-	promptParseMsg := fmt.Sprintf(PROMPT_GetIntent, msg)
-	result, err := GeminiChat(promptParseMsg)
-	if err != nil {
-		log.Println("Error:", err)
-		return nil
-	}
-
-	var intent Intent
-	// Unmarshal the JSON data into the struct
-	err = json.Unmarshal([]byte(result), &intent)
-	if err != nil {
-		log.Println("Error:", err)
-		return nil
-	}
-	log.Println(" Intent:=", intent)
-	return &intent
 }
 
 // handleArxivSearch:
