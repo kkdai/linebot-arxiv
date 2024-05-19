@@ -1,22 +1,17 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.22 
 
-# Set the Current Working Directory inside the container
+# Create and change to the app directory.
 WORKDIR /app
 
-# Copy everything from the current directory to the PWD(Present Working Directory) inside the container
-COPY . .
-
-# Download all the dependencies
+# Retrieve application dependencies.
+# This allows the container build to reuse cached dependencies.
+# Expecting to copy go.mod and if present go.sum.
+COPY go.* ./
 RUN go mod download
 
-# Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+# Copy local code to the container image.
+COPY . ./
 
-# Start fresh from a smaller image
-FROM alpine:latest
-
-# Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/main /app/main
-
-# Command to run the executable
-CMD ["/app/main"]
+# Build the binary.
+RUN go build -mod=readonly -v -o server
+CMD ["/app/server"]
