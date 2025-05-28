@@ -21,7 +21,7 @@ func GeminiImage(imgData []byte) (string, error) {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-1.5-flash-latest")
+	model := client.GenerativeModel("gemini-2.0-flash")
 	value := float32(ImageTemperture)
 	model.Temperature = &value
 	prompt := []genai.Part{
@@ -50,7 +50,7 @@ func GeminiChat(msg string) (string, error) {
 	defer client.Close()
 
 	// For text-only input, use the gemini-pro model
-	model := client.GenerativeModel("gemini-1.5-flash-latest")
+	model := client.GenerativeModel("gemini-2.0-flash")
 	modelRet, err := model.GenerateContent(ctx, genai.Text(msg))
 	if err != nil {
 		log.Println(err)
