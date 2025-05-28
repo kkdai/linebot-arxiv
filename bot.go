@@ -39,7 +39,7 @@ numberOfArticle: 0
 }
 ---`
 
-const PROMPT_Summarization = `幫我將以下內容做中文摘要: ---
+const PROMPT_Summarization = `幫我將以下內容做中文摘要, reply in zh_tw. : ---
  %s
  ---`
 
