@@ -146,3 +146,38 @@ func NormalizeArxivURL(link string) (string, error) {
 	// Return the normalized arXiv URL
 	return "https://arxiv.org/abs/" + paperID, nil
 }
+
+// ConvertToPDFURL converts an arXiv URL to its PDF URL
+func ConvertToPDFURL(absURL string) (string, error) {
+	// First normalize the URL to ensure it's a valid arXiv URL
+	normalizedURL, err := NormalizeArxivURL(absURL)
+	if err != nil {
+		return "", err
+	}
+
+	// Extract the paper ID from the normalized URL
+	paperID := getIDfromURL(normalizedURL)
+	if paperID == "" {
+		return "", errors.New("failed to extract paper ID from URL")
+	}
+
+	// Return the PDF URL
+	return "https://arxiv.org/pdf/" + paperID + ".pdf", nil
+}
+
+// IsArxivPDFURL checks if a URL is a valid arXiv PDF URL
+func IsArxivPDFURL(link string) bool {
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return false
+	}
+
+	// Check if it's arxiv.org and path contains /pdf/
+	if parsedURL.Host != "arxiv.org" {
+		return false
+	}
+
+	// Check if path contains /pdf/ and ends with .pdf
+	re := regexp.MustCompile(`/pdf/\d{4}\.\d{4,5}(v\d+)?\.pdf`)
+	return re.MatchString(parsedURL.Path)
+}

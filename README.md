@@ -3,7 +3,7 @@ ChatGPT LINE Bot for Arxiv
 
 [![GoDoc](https://godoc.org/github.com/kkdai/linebot-arxiv.svg?status.svg)](https://godoc.org/github.com/kkdai/linebot-arxiv)  ![Go](https://github.com/kkdai/linebot-arxiv/workflows/Go/badge.svg) [![goreportcard.com](https://goreportcard.com/badge/github.com/kkdai/linebot-arxiv)](https://goreportcard.com/report/github.com/kkdai/LineBotTemplate)
 
-Featues
+Features
 =============
 
 ## Menu
@@ -26,17 +26,38 @@ Show the random 10 articles on arXiv.
 
 Show your favorite articles list.
 
+## 📑 AI PDF Analysis (NEW!)
+
+**Analyze arXiv papers directly from PDF using Gemini 2.5 Flash!**
+
+This bot now supports deep analysis of arXiv papers by processing the full PDF content using Google's Gemini API. Simply click the "📑 AI 分析 PDF" button on any paper card to get:
+
+- 📌 Research overview and objectives
+- 🔬 Methodology and techniques used
+- 💡 Key findings and contributions
+- 🎯 Practical applications and impact
+
+The analysis is presented in Traditional Chinese with a professional, structured format.
+
 ## Save your arXiv link to Favorite list
 
 <img src="./img/3-save.jpg" alt="Save" title="Save to your fav list" width="300" />
 
-Save to your fav list.
+Save to your fav list with automatic summarization.
 
 ## Query keywords on arXiv
 
 <img src="./img/4-query.jpg" alt="Query" title="query" width="300" />
 
 Query keywords to find articles on arXiv.
+
+## Enhanced UI
+
+The interface has been upgraded with:
+- 📋 Clear icons for better usability
+- 💾 Visual indicators for saved articles
+- 📑 New "AI 分析 PDF" button for deep paper analysis
+- 🔍 Professional, clean button labels
 
 How to build your own LINE Bot?
 =============

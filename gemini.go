@@ -21,7 +21,7 @@ func GeminiImage(imgData []byte) (string, error) {
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel("gemini-2.0-flash")
+	model := client.GenerativeModel("gemini-2.5-flash")
 	value := float32(ImageTemperture)
 	model.Temperature = &value
 	prompt := []genai.Part{
@@ -50,13 +50,47 @@ func GeminiChat(msg string) (string, error) {
 	defer client.Close()
 
 	// For text-only input, use the gemini-pro model
-	model := client.GenerativeModel("gemini-2.0-flash")
+	model := client.GenerativeModel("gemini-2.5-flash")
 	modelRet, err := model.GenerateContent(ctx, genai.Text(msg))
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	return printResponse(modelRet), nil
+}
+
+// GeminiPDF: Input a PDF URL and get the response string.
+func GeminiPDF(pdfURL string, prompt string) (string, error) {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(geminiKey))
+	if err != nil {
+		log.Println("Failed to create Gemini client:", err)
+		return "", err
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-2.5-flash")
+	value := float32(ChatTemperture)
+	model.Temperature = &value
+
+	// Create the prompt with PDF file data
+	parts := []genai.Part{
+		genai.FileData{
+			MIMEType: "application/pdf",
+			URI:      pdfURL,
+		},
+		genai.Text(prompt),
+	}
+
+	log.Println("Begin processing PDF from URL:", pdfURL)
+	resp, err := model.GenerateContent(ctx, parts...)
+	if err != nil {
+		log.Println("Failed to generate content from PDF:", err)
+		return "", err
+	}
+	log.Println("Finished processing PDF...")
+
+	return printResponse(resp), nil
 }
 
 // Print response

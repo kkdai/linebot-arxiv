@@ -18,6 +18,7 @@ const (
 	ActionOpenDetail      string = "DetailArticle"
 	ActionTransArticle    string = "TransArticle"
 	ActionBookmarkArticle string = "BookmarkArticle"
+	ActionAnalyzePDF      string = "AnalyzePDF"
 	ActionHelp            string = "Menu"
 	ActonShowFav          string = "MyFavs"
 	ActionNewest          string = "Newest"
@@ -42,6 +43,22 @@ numberOfArticle: 0
 const PROMPT_Summarization = `幫我將以下內容做中文摘要, reply in zh_tw. : ---
  %s
  ---`
+
+const PROMPT_PDFAnalysis = `請用繁體中文分析這篇 arXiv 論文，包括：
+
+📌 **論文概述**
+- 研究主題與目的
+
+🔬 **研究方法**
+- 使用的技術與方法
+
+💡 **主要發現**
+- 關鍵結果與貢獻
+
+🎯 **應用價值**
+- 實際應用與影響
+
+請以清晰、專業的方式呈現，使用繁體中文回覆。`
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := bot.ParseRequest(r)
@@ -115,20 +132,19 @@ func getCarouseTemplate(userId string, records []*arxiv.Entry) (template *linebo
 	for _, result := range records {
 		var saveTogle string
 		if exist, _ := InArray(result.ID, checkList); !exist {
-			saveTogle = "儲存文章"
+			saveTogle = "💾 儲存文章"
 		} else {
-			saveTogle = "移除儲存"
+			saveTogle = "🗑️ 移除儲存"
 		}
 		detailData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionOpenDetail, result.ID, userId)
-		transData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionTransArticle, result.ID, userId)
+		pdfData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionAnalyzePDF, result.ID, userId)
 		SaveData := fmt.Sprintf("action=%s&url=%s&user_id=%s", ActionBookmarkArticle, result.ID, userId)
 		tmpColumn := linebot.NewCarouselColumn(
 			Image_URL,
 			truncateString(result.Title, 35)+"..",
 			truncateString(result.Summary.Body, 55)+"..",
-			//			linebot.NewURIAction("打開網址", result.ID),
-			linebot.NewPostbackAction("知道更多", detailData, "", "", "", ""),
-			linebot.NewPostbackAction("翻譯摘要(比較久)", transData, "", "", "", ""),
+			linebot.NewPostbackAction("📋 詳細資訊", detailData, "", "", "", ""),
+			linebot.NewPostbackAction("📑 AI 分析 PDF", pdfData, "", "", "", ""),
 			linebot.NewPostbackAction(saveTogle, SaveData, "", "", "", ""),
 		)
 		columnList = append(columnList, tmpColumn)
@@ -163,6 +179,9 @@ func actionHandler(event *linebot.Event, action string, values url.Values) {
 		actionBookmarkArticle(event, values)
 		log.Println("Show all article:....")
 		DB.ShowAll()
+	case ActionAnalyzePDF:
+		log.Println("ActionAnalyzePDF:", values)
+		actionAnalyzePDF(event, values)
 	case ActonShowFav:
 		log.Println("ActonShowFav:", values)
 		actionShowFavorite(event, values)
@@ -208,6 +227,44 @@ func actionGPTTranslate(event *linebot.Event, values url.Values) {
 
 	if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(sumResult)).Do(); err != nil {
 		log.Println(err)
+	}
+}
+
+// actionAnalyzePDF: Analyze PDF from arXiv using Gemini
+func actionAnalyzePDF(event *linebot.Event, values url.Values) {
+	arxivURL := values.Get("url")
+	log.Println("actionAnalyzePDF: url=", arxivURL)
+
+	// Convert arXiv URL to PDF URL
+	pdfURL, err := ConvertToPDFURL(arxivURL)
+	if err != nil {
+		log.Println("Error converting to PDF URL:", err)
+		errString := fmt.Sprintf("❌ 轉換 PDF URL 失敗: %s", err)
+		bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(errString)).Do()
+		return
+	}
+
+	log.Println("Analyzing PDF:", pdfURL)
+
+	// Send processing message first
+	processingMsg := "🔍 正在分析 PDF 論文，請稍候..."
+	bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(processingMsg)).Do()
+
+	// Analyze PDF using Gemini
+	analysisResult, err := GeminiPDF(pdfURL, PROMPT_PDFAnalysis)
+	if err != nil {
+		log.Println("Error analyzing PDF:", err)
+		errString := fmt.Sprintf("❌ PDF 分析失敗: %s\n\n這可能是因為：\n• PDF 檔案過大\n• API 配額不足\n• 網路連線問題\n\n請稍後再試或改用「摘要翻譯」功能。", err)
+		bot.PushMessage(event.Source.UserID, linebot.NewTextMessage(errString)).Do()
+		return
+	}
+
+	// Format and send the result
+	analysisResult = AddLineBreaksAroundURLs(analysisResult)
+	resultMsg := fmt.Sprintf("📄 **PDF 論文分析結果**\n\n%s\n\n📎 論文連結：\n%s", analysisResult, arxivURL)
+
+	if _, err := bot.PushMessage(event.Source.UserID, linebot.NewTextMessage(resultMsg)).Do(); err != nil {
+		log.Println("Error sending analysis result:", err)
 	}
 }
 
